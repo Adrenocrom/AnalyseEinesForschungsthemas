@@ -5,10 +5,13 @@
 \usepackage{lmodern}
 \usepackage{import}
 \usepackage{color}
+\usepackage{amsmath,lipsum}
 \usepackage{xcolor}
 \usepackage{url}
 \usepackage{tikz}
 \usepackage[backend=biber]{biblatex}
+\usepackage{caption}
+\captionsetup[figure]{labelformat=empty}
 
 \bibliography{literatur.bib}
 
@@ -59,7 +62,7 @@
 		
 		\normalsize
 		\vspace{0.2cm}
-		- 2 of 3 papers deal with pose estimation -
+		a detection and two pose estimation algoritms deal with occlusion
 		
 		\vspace{1cm}
 		Josef Schulz
@@ -73,26 +76,41 @@
 \begin{frame}
 	\frametitle{Example Problems}
 	\begin{onlyenv}<2->
-		\tikzoverlay at (0cm, 0cm) {
-		    \tikz node at (0,0)[]{
-		        \includegraphics[width=5cm]{img/examples2.png}
-		    };
-		};
+		\begin{tikzpicture}[remember picture,overlay]  
+			\node [xshift=-10cm,yshift=1.5cm] at (current page.east) {
+				\parbox{.5\textwidth}{
+					\begin{figure}
+						\includegraphics[width=5cm]{img/examples2.png}
+						\caption{DPM: classification and localisation}
+					\end{figure}
+				}
+			};
+		\end{tikzpicture}
 	\end{onlyenv}
 	\begin{onlyenv}<3->
-		\tikzoverlay at (6cm, -1cm) {
-		    \tikz node at (0,0){
-		        \includegraphics[width=5cm]{img/examples1.png}
-		    };
-		};
+		\begin{tikzpicture}[remember picture,overlay]  
+			\node [xshift=-8cm,yshift=-2.2cm] at (current page.east) {
+				\parbox{.5\textwidth}{
+					\begin{figure}
+						\includegraphics[width=4cm]{img/examples1.png}
+						\caption{joint pose estimation with Kinect2 SDK}
+					\end{figure}
+				}
+			};
+		\end{tikzpicture}
 	\end{onlyenv}
 	
 	\begin{onlyenv}<4->
-		\tikzoverlay at (1cm, -5cm) {
-			\tikz node at (0,0){
-			   \includegraphics[width=5cm]{img/examples3.png}
+		\begin{tikzpicture}[remember picture,overlay]  
+			\node [xshift=-3cm,yshift=1cm] at (current page.east) {
+				\parbox{.5\textwidth}{
+					\begin{figure}
+						\includegraphics[width=5cm]{img/examples3.png}
+						\caption{pose estimation with occlusion}
+					\end{figure}
+				}
 			};
-		};
+		\end{tikzpicture}
 	\end{onlyenv}
 
 \end{frame}
@@ -111,7 +129,8 @@
 	\Large
 
 	\begin{figure}
-		\includegraphics[width=\textwidth]{img/HPE.png}
+		\includegraphics[width=5cm]{img/HPE.png}
+		\caption{Kinect2 SDK}
 	\end{figure}
 		
 	\begin{align*}
@@ -149,7 +168,7 @@
 			    \item[$q$] pixel location
 			    \item[$D$] reference depth image
 			    \item[$c$] class label corresponding to limbs
-			    \item[$\{V_j\}$] is set of vectors:
+			    \item[$\{V_j\}$] is set of 3D offset vectors between $q$ and the joint position $q_j$:
 			    	\begin{itemize}
 				    	\item[] $V_j = q_j - q$
 			    	\end{itemize}
@@ -189,7 +208,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Slit Node}
+	\frametitle{Split Node}
 	\Large
 	
 	\begin{center}
@@ -245,14 +264,21 @@
 	\frametitle{Leaf Node}
 	\large
 	
+	a leaf node stores:
+	\begin{itemize}
+		\item class $c$
+		\item two cluster centers $V_{ljk}$ for each joint
+		\item two support values $w_{ljk}$ for each cluster
+		\item probabilities over $V_j$:
+	\end{itemize}
+	
 	\begin{equation*}
 		p_j(V | l) \propto \sum\limits_{k \in K}^{} w_{ljk} \cdot \exp(- \Vert \frac{V - V_{ljk}}{b} \Vert^2_2)
 	\end{equation*}
-	\vspace{1cm}
+	\vspace{.5cm}
 	\begin{itemize}
 		\item[$K$ - ] cluster
-		\item[$w_{ljk}$ - ] is determined by offset vectors ended in the cluster k,
-		support
+		\item[$w_{ljk}$ - ] is determined by offset vectors ended in the cluster $k, k \in K$
 		\item[$V_{ljk}$ - ] cluster center
 	\end{itemize}
 \end{frame}
@@ -275,12 +301,15 @@
 	
 	\vspace{0.5cm}
 	
-	the clusters with the highest summed weights $w_j$ are used for prediction.
+	The cluster with the highest summed weights $w_j$ are used for prediction.
 \end{frame}
 
 \begin{frame}
 	\frametitle{Occlusion Aware Regression Forests}
-	
+	\textbf{idea:} Add new class labels which does not correspond to the body.
+	The assumption is that if a person interact with a specific object, some joint
+	position could be predicted.
+	 
 	\begin{equation*}
 		Q = Q \cup \{(q_{occ}, D, C_{occ}, \{v_{jocc}\})\}
 	\end{equation*}
@@ -347,18 +376,18 @@
 	\begin{columns}
 		\begin{column}{.5\textwidth}
 			\begin{figure}
-				\includegraphics[width=\textwidth]{img/res1.png}
+				\includegraphics[width=\textwidth]{img/res2.png}
 			\end{figure}
 			\begin{center}
-				with semantics
+				without semantics: the joint at the hip is not good estimated
 			\end{center}
 		\end{column}
 		\begin{column}{.5\textwidth}
 			\begin{figure}
-				\includegraphics[width=\textwidth]{img/res2.png}
+				\includegraphics[width=\textwidth]{img/res1.png}
 			\end{figure}
 			\begin{center}
-				without semantics
+				with semantics
 			\end{center}
 		\end{column}
 	\end{columns}
@@ -369,18 +398,18 @@
 	\begin{columns}
 		\begin{column}{.5\textwidth}
 			\begin{figure}
-				\includegraphics[width=\textwidth]{img/res1.png}
-			\end{figure}
-			\begin{center}
-				OARF with semantics
-			\end{center}
-		\end{column}
-		\begin{column}{.5\textwidth}
-			\begin{figure}
 				\includegraphics[width=\textwidth]{img/res3.png}
 			\end{figure}
 			\begin{center}
 				Kinect2 SDK
+			\end{center}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\begin{figure}
+				\includegraphics[width=\textwidth]{img/res1.png}
+			\end{figure}
+			\begin{center}
+				OARF with semantics
 			\end{center}
 		\end{column}
 	\end{columns}
@@ -400,8 +429,12 @@
 		in $\%$
 	\end{center}
 	
-	\vspace{2cm}
-	Real + Synthetic Data
+	\vspace{1cm}
+	Testset: real + synthetic data
+	\begin{itemize}
+		\item real data was taken with the Kinect
+		\item synthetic data is generated by rendered scenes
+	\end{itemize}
 \end{frame}
 
 \subsection{Occlusion Patterns}
@@ -513,12 +546,15 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{OC-DPM}
+	\frametitle{Single-Object Occlusion Patterns - OC-DPM}
 	\Large
-	$C = \{1, ..., C_{visible}\} \cup C_{invisble}$ 
-	
+	Learn class from object instances with distinctive appearances of occlusion.	
+	\large
 	\begin{columns}
 		\begin{column}{.5\textwidth}
+			\\
+			\vspace{.5cm}
+			$C = \{1, ..., C_{visible}\} \cup C_{invisble}$ 
 			\begin{figure}
 				\begin{tikzpicture}[scale=0.9,
 									ball/.style = {circle, draw, text width=1cm, align=center, inner sep=0pt}]
@@ -533,7 +569,7 @@
 				\end{tikzpicture}
 			\end{figure}
 			\begin{itemize}
-				\item like standart dpm
+				\item like standard DPM
 				\item trained with occlusion
 				\item $C$ are components
 			\end{itemize}
@@ -548,8 +584,10 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{SYM-DPM}
-	%\Large
+	\frametitle{Double-Objects With Joint Root - SYM-DPM}
+	\large
+	Represent occluder and occludee at once and combine them with a root joint.
+	\abovedisplayskip=0pt
 	\begin{align*}
 		E'_c(p; I) = \langle v^c, \Phi(p_0; I) \rangle 
 					&+ \langle \overline{w}^c, \Phi(p_{0}, \overline{p}_0) \rangle 
@@ -557,11 +595,11 @@
 				    &+ E_c(\overline{p}_0; I) 
 				    &&+ E_c(\underline{p}_0; I) \\
 	\end{align*}
-		
+	
 	\begin{columns}
 		\begin{column}{.5\textwidth}
 			\begin{figure}
-				\begin{tikzpicture}[scale=0.7, every node/.style={scale=0.7},
+				\begin{tikzpicture}[scale=0.6, every node/.style={scale=0.6},
 									ball/.style = {circle, draw, text width=0.7cm, align=center, inner sep=0pt}]
 					\node[ball] (p0) at (0, 0) {$p_0$};
 					\node[ball] (p1) at (-2, -2) {$\overline{p}_0$};
@@ -593,15 +631,16 @@
 		\end{column}
 		\begin{column}{0.5\textwidth}
 			\begin{figure}
-				\includegraphics[width=.9\textwidth]{img/exa2.png}
+				\includegraphics[width=.8\textwidth]{img/exa2.png}
 			\end{figure}
 		\end{column}
 	\end{columns}
 \end{frame}
 
 \begin{frame}
-	\frametitle{ASYM-DPM}
-	
+	\frametitle{Double-Objects Without Joint Root - ASYM-DPM}
+	\large
+	Both objects are combined to one, based on the intuition that the occluder can be trusted more.
 	\begin{columns}
 		\begin{column}{.5\textwidth}
 			\begin{figure}
@@ -642,7 +681,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Mining Trainingsdata}
+	\frametitle{Mining Training Data}
 	\Large
 	Feature Space: \\
 	\begin{itemize}
@@ -661,7 +700,7 @@
 
 \subsubsection{Trainingsdata}
 \begin{frame}
-	\frametitle{Mining Trainingsdata}
+	\frametitle{Mining Training Data}
 	\begin{figure}
 	\includegraphics[width=0.7\textwidth]{img/dpmoc_2.png}
 	\end{figure}
@@ -884,7 +923,7 @@
 		\begin{column}{.7\textwidth}
 			\begin{itemize}
 				\item[$(> -1)$ - ] visible versus occluded voxel
-				\item[$(>  0)$ - ] dominant or not visible voxel
+				\item[$(>  0)$ - ] if greater $0$ the voxel is dominant
 			\end{itemize}
 		\end{column}
 	\end{columns}
