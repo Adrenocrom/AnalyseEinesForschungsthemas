@@ -62,7 +62,7 @@
 		
 		\normalsize
 		\vspace{0.2cm}
-		a detection and two pose estimation algoritms deal with occlusion
+		- detection and pose estimation algoritms deal with occlusion -
 		
 		\vspace{1cm}
 		Josef Schulz
@@ -118,6 +118,61 @@
 \begin{frame}{Content}
 	\large
 	\tableofcontents[subsubsectionstyle=hide]
+\end{frame}
+
+\section{Training with Occlusion}
+\begin{frame}
+	\frametitle{Training Set}
+	\Large
+	\begin{itemize}
+		\item 630 without
+		\item 630 with occlusion for every object
+		\item added frames with $\approx$ 10\% - 70\% occlusion
+		\item 2 variants(below) per frame 
+	\end{itemize}
+	\vspace{0.3cm}
+	variants of occlusion:
+	\begin{itemize}
+		\item border: top, bottom, left, right
+		\item randomized floodFill
+		\item circle floodFill
+		\item vertical thick and small lines
+		\item noise
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Training Examples}
+	\Large
+	Model: occlusion is a kind of noise
+	
+	\normalsize
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+			\begin{figure}
+				\includegraphics[width=\textwidth]{img/rgb_00788.png}
+				\caption{occlusion degree 32\%}
+			\end{figure}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\begin{figure}
+				\includegraphics[width=\textwidth]{img/rgb_00755.png}
+				\caption{occlusion degree 49\%}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Result}
+	\Large
+	
+	\begin{itemize}
+		\item accuracy of pose estimation has not increased
+		\item no clear trend
+		\item training with random occlusion is not enough
+		\item better models are needed
+	\end{itemize}
 \end{frame}
 
 \section{Algorithms}
@@ -979,6 +1034,7 @@
 \end{frame}
 
 \section{Conclusions}
+
 \begin{frame}
 	\frametitle{Robustness Against Occlusion - Conclusion}
 	\Large
